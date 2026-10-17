@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recepção - Disponibilidade</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #f2f4f7; }
+  h1 { background: #1f3a5f; color: #fff; margin: 0; padding: 20px; font-size: 24px; }
+  #lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 20px; }
+  .card { border-radius: 12px; padding: 24px; color: #fff; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+  .on { background: #2e9e4f; }
+  .off { background: #c0392b; }
+  .nome { font-size: 22px; font-weight: bold; }
+  .status { font-size: 28px; margin: 12px 0 4px; }
+  .hora { font-size: 13px; opacity: .85; }
+</style>
+</head>
+<body>
+<h1>Disponibilidade dos Técnicos <button onclick="sair()" style="float:right;padding:8px 14px;cursor:pointer">Sair</button></h1>
+<div id="lista"></div>
+<script>
+async function carregar() {
+  try {
+    const r = await fetch('/api/tecnicos');
+    if (r.status === 401) return location.href = '/login';
+    const dados = await r.json();
+    document.getElementById('lista').innerHTML = dados.map(t => `
+      <div class="card ${t.disponivel ? 'on' : 'off'}">
+        <div class="nome"></div>
+        <div class="status">${t.disponivel ? 'DISPONÍVEL' : 'INDISPONÍVEL'}</div>
+        <div class="hora">${t.atualizado ? 'Desde ' + new Date(t.atualizado).toLocaleTimeString('pt-BR') : ''}</div>
+      </div>`).join('');
+    document.querySelectorAll('.nome').forEach((el, i) => el.textContent = dados[i].nome);
+  } catch {}
+}
+async function sair() {
+  await fetch('/api/logout', { method: 'POST' });
+  location.href = '/login';
+}
+carregar();
+setInterval(carregar, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Técnico</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; }
+  #nome { text-align: center; padding: 16px; font-size: 26px; background: #1f3a5f; color: #fff; }
+  #btn { flex: 1; border: 0; color: #fff; font-size: 12vmin; font-weight: bold; cursor: pointer; }
+  .on { background: #2e9e4f; }
+  .off { background: #c0392b; }
+  small { display: block; font-size: 4vmin; font-weight: normal; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div id="nome"></div>
+<button onclick="sair()" style="padding:8px;cursor:pointer">Sair</button>
+<button id="btn" class="off">...</button>
+<script>
+const id = location.pathname.split('/')[2];
+const btn = document.getElementById('btn');
+let disponivel = false;
+
+function render(t) {
+  disponivel = t.disponivel;
+  document.getElementById('nome').textContent = t.nome;
+  document.title = t.nome;
+  btn.className = disponivel ? 'on' : 'off';
+  btn.innerHTML = (disponivel ? 'DISPONÍVEL' : 'INDISPONÍVEL') +
+    `<small>Toque para ficar ${disponivel ? 'indisponível' : 'disponível'}</small>`;
+}
+
+async function carregar() {
+  const r = await fetch('/api/tecnicos');
+  if (r.status === 401) return location.href = '/login';
+  const t = (await r.json()).find(x => x.id === id);
+  if (t) render(t);
+}
+
+btn.onclick = async () => {
+  const r = await fetch(`/api/tecnicos/${id}/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ disponivel: !disponivel }),
+  });
+  if (r.ok) render(await r.json());
+};
+
+async function sair() {
+  await fetch('/api/logout', { method: 'POST' });
+  location.href = '/login';
+}
+carregar();
+setInterval(carregar, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadastro de Técnico</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f2f4f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+  form { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.2); width: 280px; }
+  h1 { margin: 0 0 20px; font-size: 22px; color: #1f3a5f; }
+  input, button { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 12px; font-size: 16px; }
+  button { background: #1f3a5f; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
+  #erro { color: #c0392b; min-height: 20px; }
+  a { color: #1f3a5f; font-size: 14px; }
+</style>
+</head>
+<body>
+<form id="f">
+  <h1>Cadastro de Técnico</h1>
+  <input id="nome" placeholder="Seu nome" autocomplete="username" required autofocus>
+  <input id="senha" type="password" placeholder="Senha (mín. 4 caracteres)" autocomplete="new-password" required>
+  <div id="erro"></div>
+  <button>Cadastrar</button>
+  <a href="/login">Já tenho cadastro</a>
+</form>
+<script>
+document.getElementById('f').onsubmit = async (e) => {
+  e.preventDefault();
+  const r = await fetch('/api/cadastro', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome: nome.value, senha: senha.value }),
+  });
+  const d = await r.json();
+  if (r.ok) location.href = d.destino;
+  else document.getElementById('erro').textContent = d.erro;
+};
+</script>
+</body>
+</html>
